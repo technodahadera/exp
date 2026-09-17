@@ -3,162 +3,205 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#000000">
   <title>סרטון פתיחה</title>
+
   <style>
     *{box-sizing:border-box}
+
     html,body{
       margin:0;
       width:100%;
       height:100%;
       background:#000;
-      font-family:Arial,"Rubik","Assistant",sans-serif;
       overflow:hidden;
+      font-family:Arial,"Rubik","Assistant",sans-serif;
     }
+
     .page{
       position:relative;
       width:100%;
       height:100%;
+      background:#000;
       display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    video{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#000;
+      display:block;
+    }
+
+    .start-overlay{
+      position:absolute;
+      inset:0;
+      z-index:20;
+      display:none;
       align-items:center;
       justify-content:center;
       background:#000;
     }
-    #player{
-      width:100%;
-      height:100%;
+
+    .start-overlay.show{
+      display:flex;
     }
+
+    .start-btn,
     .next-btn{
-      position:absolute;
-      left:50%;
-      bottom:42px;
-      transform:translateX(-50%) translateY(16px);
-      opacity:0;
-      pointer-events:none;
-      z-index:20;
-      min-width:180px;
-      padding:16px 34px;
       border:0;
       border-radius:999px;
-      font-size:24px;
-      font-weight:800;
+      padding:17px 38px;
+      min-width:190px;
+      font-size:25px;
+      font-weight:900;
       cursor:pointer;
       color:#031521;
       background:linear-gradient(135deg,#63e7ff,#7b86ff);
-      box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 28px rgba(99,231,255,.35);
-      transition:opacity .35s ease,transform .35s ease,box-shadow .2s ease;
+      box-shadow:
+        0 12px 35px rgba(0,0,0,.45),
+        0 0 34px rgba(99,231,255,.32);
     }
+
+    .next-btn{
+      position:absolute;
+      z-index:30;
+      left:50%;
+      bottom:42px;
+      transform:translateX(-50%) translateY(18px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .35s ease,transform .35s ease;
+    }
+
     .next-btn.show{
       opacity:1;
       pointer-events:auto;
       transform:translateX(-50%) translateY(0);
     }
-    .start-overlay{
+
+    .end-screen{
       position:absolute;
       inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:30;
-      background:rgba(0,0,0,.72);
-      backdrop-filter:blur(6px);
+      z-index:15;
+      opacity:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at center,rgba(16,49,83,.55),transparent 48%),
+        #020713;
+      transition:opacity .4s ease;
     }
-    .start-overlay.show{display:flex}
-    .start-btn{
-      padding:18px 34px;
-      border:0;
-      border-radius:999px;
-      font-size:24px;
-      font-weight:800;
-      cursor:pointer;
-      color:#031521;
-      background:linear-gradient(135deg,#63e7ff,#7b86ff);
-      box-shadow:0 0 32px rgba(99,231,255,.35);
+
+    .end-screen.show{
+      opacity:1;
     }
+
     @media (max-width:700px){
-      .next-btn,.start-btn{font-size:20px}
+      .start-btn,.next-btn{
+        min-width:160px;
+        font-size:20px;
+        padding:14px 28px;
+      }
       .next-btn{bottom:24px}
     }
   </style>
 </head>
+
 <body>
   <div class="page">
-    <div id="player"></div>
 
-    <button id="nextBtn" class="next-btn" type="button">הבא</button>
+    <!--
+      העלו לאותה תיקייה ב-GitHub קובץ בשם:
+      video.mp4
+    -->
+    <video
+      id="introVideo"
+      autoplay
+      playsinline
+      preload="auto"
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate nofullscreen"
+    >
+      <source src="video.mp4" type="video/mp4">
+    </video>
 
+    <!-- מוצג רק אם הדפדפן חסם הפעלה אוטומטית עם קול -->
     <div id="startOverlay" class="start-overlay">
-      <button id="startBtn" class="start-btn" type="button">הפעלת הסרטון</button>
+      <button id="startBtn" class="start-btn" type="button">
+        הפעלת הסרטון
+      </button>
     </div>
+
+    <div id="endScreen" class="end-screen"></div>
+
+    <!-- מופיע רק כשהסרטון הסתיים -->
+    <button id="nextBtn" class="next-btn" type="button">
+      הבא
+    </button>
+
   </div>
 
   <script>
-    let player;
-    let autoplayCheckTimer;
+    const video = document.getElementById("introVideo");
+    const startOverlay = document.getElementById("startOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const endScreen = document.getElementById("endScreen");
 
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
+    async function tryAutoplayWithSound(){
+      video.muted = false;
+      video.volume = 1;
 
-    function onYouTubeIframeAPIReady(){
-      player = new YT.Player("player", {
-        videoId: "5VtZeBtadAA",
-        playerVars: {
-          autoplay: 1,
-          mute: 0,
-          controls: 0,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          disablekb: 1,
-          fs: 0
-        },
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange
-        }
-      });
-    }
-
-    function onPlayerReady(event){
       try{
-        event.target.unMute();
-        event.target.setVolume(100);
-        event.target.playVideo();
-      }catch(e){}
+        await video.play();
+      }catch(error){
+        startOverlay.classList.add("show");
+      }
+    }
 
-      autoplayCheckTimer = setTimeout(() => {
-        const state = player.getPlayerState();
-        if(state !== YT.PlayerState.PLAYING){
-          document.getElementById("startOverlay").classList.add("show");
+    window.addEventListener("load", () => {
+      tryAutoplayWithSound();
+
+      setTimeout(() => {
+        if(video.paused && !video.ended){
+          startOverlay.classList.add("show");
         }
-      }, 1400);
-    }
-
-    function onPlayerStateChange(event){
-      if(event.data === YT.PlayerState.PLAYING){
-        clearTimeout(autoplayCheckTimer);
-        document.getElementById("startOverlay").classList.remove("show");
-      }
-
-      if(event.data === YT.PlayerState.ENDED){
-        document.getElementById("nextBtn").classList.add("show");
-      }
-    }
-
-    document.getElementById("startBtn").addEventListener("click", () => {
-      document.getElementById("startOverlay").classList.remove("show");
-      player.unMute();
-      player.setVolume(100);
-      player.playVideo();
+      }, 800);
     });
 
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      /*
-        כאן ניתן להגדיר לאן כפתור "הבא" יעבור.
+    startBtn.addEventListener("click", async () => {
+      startOverlay.classList.remove("show");
+      video.muted = false;
+      video.volume = 1;
 
-        לדוגמה:
+      try{
+        await video.play();
+      }catch(error){
+        startOverlay.classList.add("show");
+      }
+    });
+
+    video.addEventListener("play", () => {
+      startOverlay.classList.remove("show");
+    });
+
+    video.addEventListener("ended", () => {
+      video.style.visibility = "hidden";
+      endScreen.classList.add("show");
+      nextBtn.classList.add("show");
+    });
+
+    nextBtn.addEventListener("click", () => {
+      /*
+        החליפו את השורה הבאה בכתובת של השלב הבא.
+
+        דוגמה:
         window.location.href = "mission.html";
       */
+
       window.dispatchEvent(new CustomEvent("immersive-next"));
     });
   </script>
