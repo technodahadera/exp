@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>סרטון פתיחה</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      background:#000;
+      font-family:Arial,"Rubik","Assistant",sans-serif;
+      overflow:hidden;
+    }
+    .page{
+      position:relative;
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000;
+    }
+    #player{
+      width:100%;
+      height:100%;
+    }
+    .next-btn{
+      position:absolute;
+      left:50%;
+      bottom:42px;
+      transform:translateX(-50%) translateY(16px);
+      opacity:0;
+      pointer-events:none;
+      z-index:20;
+      min-width:180px;
+      padding:16px 34px;
+      border:0;
+      border-radius:999px;
+      font-size:24px;
+      font-weight:800;
+      cursor:pointer;
+      color:#031521;
+      background:linear-gradient(135deg,#63e7ff,#7b86ff);
+      box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 28px rgba(99,231,255,.35);
+      transition:opacity .35s ease,transform .35s ease,box-shadow .2s ease;
+    }
+    .next-btn.show{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateX(-50%) translateY(0);
+    }
+    .start-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:30;
+      background:rgba(0,0,0,.72);
+      backdrop-filter:blur(6px);
+    }
+    .start-overlay.show{display:flex}
+    .start-btn{
+      padding:18px 34px;
+      border:0;
+      border-radius:999px;
+      font-size:24px;
+      font-weight:800;
+      cursor:pointer;
+      color:#031521;
+      background:linear-gradient(135deg,#63e7ff,#7b86ff);
+      box-shadow:0 0 32px rgba(99,231,255,.35);
+    }
+    @media (max-width:700px){
+      .next-btn,.start-btn{font-size:20px}
+      .next-btn{bottom:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div id="player"></div>
+
+    <button id="nextBtn" class="next-btn" type="button">הבא</button>
+
+    <div id="startOverlay" class="start-overlay">
+      <button id="startBtn" class="start-btn" type="button">הפעלת הסרטון</button>
+    </div>
+  </div>
+
+  <script>
+    let player;
+    let autoplayCheckTimer;
+
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    function onYouTubeIframeAPIReady(){
+      player = new YT.Player("player", {
+        videoId: "5VtZeBtadAA",
+        playerVars: {
+          autoplay: 1,
+          mute: 0,
+          controls: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          disablekb: 1,
+          fs: 0
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event){
+      try{
+        event.target.unMute();
+        event.target.setVolume(100);
+        event.target.playVideo();
+      }catch(e){}
+
+      autoplayCheckTimer = setTimeout(() => {
+        const state = player.getPlayerState();
+        if(state !== YT.PlayerState.PLAYING){
+          document.getElementById("startOverlay").classList.add("show");
+        }
+      }, 1400);
+    }
+
+    function onPlayerStateChange(event){
+      if(event.data === YT.PlayerState.PLAYING){
+        clearTimeout(autoplayCheckTimer);
+        document.getElementById("startOverlay").classList.remove("show");
+      }
+
+      if(event.data === YT.PlayerState.ENDED){
+        document.getElementById("nextBtn").classList.add("show");
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      document.getElementById("startOverlay").classList.remove("show");
+      player.unMute();
+      player.setVolume(100);
+      player.playVideo();
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      /*
+        כאן ניתן להגדיר לאן כפתור "הבא" יעבור.
+
+        לדוגמה:
+        window.location.href = "mission.html";
+      */
+      window.dispatchEvent(new CustomEvent("immersive-next"));
+    });
+  </script>
+</body>
+</html>
