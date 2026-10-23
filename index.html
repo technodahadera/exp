@@ -2,208 +2,87 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#000000">
-  <title>סרטון פתיחה</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08080d">
+  <meta name="description" content="סרט פתיחה – טכנודע">
+  <title>סרט פתיחה | טכנודע</title>
   <style>
-    *{box-sizing:border-box}
-
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      background:#000;
-      overflow:hidden;
-      font-family:Arial,"Rubik","Assistant",sans-serif;
-    }
-
-    .page{
-      position:relative;
-      width:100%;
-      height:100%;
-      background:#000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    video{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#000;
-      display:block;
-    }
-
-    .start-overlay{
-      position:absolute;
-      inset:0;
-      z-index:20;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      background:#000;
-    }
-
-    .start-overlay.show{
-      display:flex;
-    }
-
-    .start-btn,
-    .next-btn{
-      border:0;
-      border-radius:999px;
-      padding:17px 38px;
-      min-width:190px;
-      font-size:25px;
-      font-weight:900;
-      cursor:pointer;
-      color:#031521;
-      background:linear-gradient(135deg,#63e7ff,#7b86ff);
-      box-shadow:
-        0 12px 35px rgba(0,0,0,.45),
-        0 0 34px rgba(99,231,255,.32);
-    }
-
-    .next-btn{
-      position:absolute;
-      z-index:30;
-      left:50%;
-      bottom:42px;
-      transform:translateX(-50%) translateY(18px);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .35s ease,transform .35s ease;
-    }
-
-    .next-btn.show{
-      opacity:1;
-      pointer-events:auto;
-      transform:translateX(-50%) translateY(0);
-    }
-
-    .end-screen{
-      position:absolute;
-      inset:0;
-      z-index:15;
-      opacity:0;
-      pointer-events:none;
-      background:
-        radial-gradient(circle at center,rgba(16,49,83,.55),transparent 48%),
-        #020713;
-      transition:opacity .4s ease;
-    }
-
-    .end-screen.show{
-      opacity:1;
-    }
-
-    @media (max-width:700px){
-      .start-btn,.next-btn{
-        min-width:160px;
-        font-size:20px;
-        padding:14px 28px;
-      }
-      .next-btn{bottom:24px}
-    }
+    :root { color-scheme: dark; --accent:#c56ee1; }
+    * { box-sizing: border-box; }
+    html, body { margin:0; min-height:100%; width:100%; }
+    body { font-family:Arial, sans-serif; background:#08080d; color:#fff; }
+    main { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:clamp(8px,2.5vw,28px); }
+    header { width:min(100%,1100px); display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    h1 { margin:0; font-size:clamp(18px,2.2vw,28px); font-weight:700; }
+    .video-shell { width:min(100%,1100px); position:relative; background:#000; aspect-ratio:16/9; border-radius:16px; overflow:hidden; box-shadow:0 14px 56px #0008; }
+    video { display:block; width:100%; height:100%; object-fit:contain; background:#000; }
+    .actions { display:flex; gap:10px; align-items:center; }
+    button { font:inherit; background:#25212e; border:1px solid #514359; color:white; border-radius:10px; padding:9px 14px; cursor:pointer; white-space:nowrap; }
+    button:hover,button:focus-visible { background:#43354f; outline:2px solid var(--accent); outline-offset:2px; }
+    #soundButton { background:#71378a; border-color:#9650b0; }
+    .hint { margin:0; color:#c5bcc9; font-size:13px; text-align:center; }
+    .error { display:none; position:absolute; inset:0; padding:24px; align-items:center; justify-content:center; text-align:center; background:#14111c; line-height:1.6; }
+    .error.visible { display:flex; }
+    body.embed main { padding:0; gap:0; }
+    body.embed header, body.embed .hint { display:none; }
+    body.embed .video-shell { width:100vw; height:100dvh; max-width:none; aspect-ratio:auto; border-radius:0; box-shadow:none; }
+    @media(max-width:620px) { main { gap:12px; } header { flex-wrap:wrap; } .actions { margin-inline-start:auto; } .video-shell { border-radius:9px; } button { padding:9px 11px; font-size:14px; } }
   </style>
 </head>
-
 <body>
-  <div class="page">
-
-    <!--
-      העלו לאותה תיקייה ב-GitHub קובץ בשם:
-      video.mp4
-    -->
-    <video
-      id="introVideo"
-      autoplay
-      playsinline
-      preload="auto"
-      disablepictureinpicture
-      controlslist="nodownload noplaybackrate nofullscreen"
-    >
-      <source src="video.mp4" type="video/mp4">
-    </video>
-
-    <!-- מוצג רק אם הדפדפן חסם הפעלה אוטומטית עם קול -->
-    <div id="startOverlay" class="start-overlay">
-      <button id="startBtn" class="start-btn" type="button">
-        הפעלת הסרטון
-      </button>
+  <main>
+    <header>
+      <h1>סרט פתיחה</h1>
+      <div class="actions">
+        <button id="soundButton" type="button">🔊 הפעל קול</button>
+        <button id="fullscreenButton" type="button">⛶ מסך מלא</button>
+      </div>
+    </header>
+    <div class="video-shell" id="videoShell">
+      <video id="video" controls autoplay muted playsinline preload="auto" aria-label="סרט פתיחה">
+        <source src="https://res.cloudinary.com/gstuiyt9/video/upload/v1792740979/%D7%A1%D7%A8%D7%98_%D7%A4%D7%AA%D7%99%D7%97%D7%94.mp4" type="video/mp4">
+        הדפדפן שלך אינו תומך בניגון וידאו.
+      </video>
+      <div class="error" id="errorMessage" role="status">לא ניתן לטעון את הסרטון. בדקו את החיבור לאינטרנט או פתחו את קישור הסרטון המקורי.</div>
     </div>
-
-    <div id="endScreen" class="end-screen"></div>
-
-    <!-- מופיע רק כשהסרטון הסתיים -->
-    <button id="nextBtn" class="next-btn" type="button">
-      הבא
-    </button>
-
-  </div>
-
+    <p class="hint">הסרטון מתחיל אוטומטית ללא קול בהתאם להגבלות הדפדפן. לחצו על ״הפעל קול״ כדי לשמוע.</p>
+  </main>
   <script>
-    const video = document.getElementById("introVideo");
-    const startOverlay = document.getElementById("startOverlay");
-    const startBtn = document.getElementById("startBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const endScreen = document.getElementById("endScreen");
+    (() => {
+      'use strict';
+      const video = document.getElementById('video');
+      const soundButton = document.getElementById('soundButton');
+      const fullscreenButton = document.getElementById('fullscreenButton');
+      const videoShell = document.getElementById('videoShell');
+      const errorMessage = document.getElementById('errorMessage');
 
-    async function tryAutoplayWithSound(){
-      video.muted = false;
-      video.volume = 1;
-
-      try{
-        await video.play();
-      }catch(error){
-        startOverlay.classList.add("show");
+      if (new URLSearchParams(window.location.search).get('embed') === '1') {
+        document.body.classList.add('embed');
       }
-    }
 
-    window.addEventListener("load", () => {
-      tryAutoplayWithSound();
-
-      setTimeout(() => {
-        if(video.paused && !video.ended){
-          startOverlay.classList.add("show");
+      const syncSound = () => {
+        soundButton.textContent = video.muted ? '🔊 הפעל קול' : '🔇 השתק קול';
+      };
+      soundButton.addEventListener('click', () => {
+        video.muted = !video.muted;
+        syncSound();
+        if (video.paused) video.play().catch(() => {});
+      });
+      video.addEventListener('volumechange', syncSound);
+      fullscreenButton.addEventListener('click', () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen?.();
+        } else if (videoShell.requestFullscreen) {
+          videoShell.requestFullscreen();
+        } else if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
         }
-      }, 800);
-    });
-
-    startBtn.addEventListener("click", async () => {
-      startOverlay.classList.remove("show");
-      video.muted = false;
-      video.volume = 1;
-
-      try{
-        await video.play();
-      }catch(error){
-        startOverlay.classList.add("show");
-      }
-    });
-
-    video.addEventListener("play", () => {
-      startOverlay.classList.remove("show");
-    });
-
-    video.addEventListener("ended", () => {
-      video.style.visibility = "hidden";
-      endScreen.classList.add("show");
-      nextBtn.classList.add("show");
-    });
-
-    nextBtn.addEventListener("click", () => {
-      /*
-        החליפו את השורה הבאה בכתובת של השלב הבא.
-
-        דוגמה:
-        window.location.href = "mission.html";
-      */
-
-      window.dispatchEvent(new CustomEvent("immersive-next"));
-    });
+      });
+      video.addEventListener('error', () => errorMessage.classList.add('visible'));
+      // נסו ניגון אוטומטי שקט. במקרה של חסימה, המשתמש יכול לנגן באמצעות בקרי הווידאו.
+      video.play().catch(() => {});
+      syncSound();
+    })();
   </script>
 </body>
 </html>
